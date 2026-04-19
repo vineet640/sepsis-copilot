@@ -1,0 +1,46 @@
+# About the project
+
+## Inspiration
+
+Sepsis moves fast, but **information often moves slowly**—especially between the bedside team and families in a stressful ED stay. We were inspired by a simple idea: **one encounter, two lenses**. Clinicians need **precision and action**; patients and families need **clarity, reassurance, and orientation** without losing respect for how sick someone might be.
+
+We also wanted **transparency** to be concrete, not decorative—**who opened the care summary** and an optional **verifiable audit trail** on Solana (devnet memos with **no PHI** on-chain).
+
+## What we learned
+
+- **Dual UX is a product choice**: “Clinician” vs “Patient & family” is not a theme toggle—it changes **language**, **density**, and **what we emphasize** (risk vs comfort, jargon vs plain words).
+- **Generative AI is a narrator, not the scoreboard**: LLM output **explains and phrases** modeled results; **risk and trajectories** come from explicit rules over structured fields (SOFA-related signals, timepoints TP1–TP4, bundle timings).
+- **Infrastructure is part of the demo**: shipping with optional keys taught us to **degrade gracefully**—cache where it helps, fall back to sensible copy when APIs are offline, and keep Mongo/S3/Solana **optional** for judges who run locally.
+- **Web3 ops are real**: devnet SOL, RPC limits, and faucet rate limits affect whether **on-chain signatures** appear—treating that as an operator concern, not magic.
+
+We think of the **rule-based risk** $R$ as a function of severity signals and timepoint features $\mathbf{z}_t$:
+
+$$
+R \approx f_{\text{rules}}\bigl(\text{SOFA-like signals},\; \mathbf{z}_{t_1},\ldots,\mathbf{z}_{t_4}\bigr).
+$$
+
+*(If math does not render in Devpost, paste the same expression in their equation tool, or read it as: “R is approximated by applying our rule engine to SOFA-like signals and features at timepoints $t_1\ldots t_4$.”)*
+
+The LLM’s job is to **describe** $R$ and trajectories in language matched to each audience—not to silently replace clinical logic.
+
+## Synthetic data generation
+
+All patient rows come from our **master synthetic sepsis generator** (`gen.py`, **v7**): a reproducible pipeline (**fixed global seed**) that emits `combined_sepsis_data_v7.csv`—**not real PHI**. We simulate **six hospital archetypes** (academic, rural critical access, quaternary referral, safety-net urban, suburban community, for-profit regional) with **archetype-specific** ED volume, **sepsis prevalence**, **payer mix**, **race/ethnicity**, and **comorbidity** patterns. Each encounter draws **clinical trajectories** across modeled **timepoints (TP1–TP4)**—vitals, labs, SOFA-related inputs, sepsis severity, and **care-process delays** (e.g., recognition, door-to-antibiotics)—with v7 fixes for trajectory diversity (e.g., **crash–recover** beyond shock-only), **weekend delay** logic, and **SOFA mortality calibration** aligned to reference tables. The CSV is the **single source** the **FastAPI** backend loads for demos and risk/timeline computation.
+
+## How we built it
+
+- **Data & engine**: Synthetic cohort (`combined_sepsis_data_v7.csv`) → **FastAPI** services for encounters, computed risk, timelines, and recommended actions.
+- **Frontend**: **React + Vite + Tailwind** encounter dashboards—vitals and trajectory charts, timeline grids, patient/clinician layouts.
+- **Generative AI**: **Gemini** for explanations (mode-specific tone), chat, simplified wording, and chart narration; **ElevenLabs** for spoken summaries; **S3** for hosted audio when configured.
+- **Persistence**: **MongoDB Atlas** (recently viewed, saved cases, access logs, caches), with an in-memory fallback for quick demos.
+- **Audit**: **Solana devnet** memo transactions with non-PHI payloads and explorer-linked **signatures** when the signing wallet is funded.
+
+## Challenges
+
+- **Solana signatures without SOL**: Memo transactions need **fees**; public RPC **airdrops** often hit **HTTP 429**. We added operator-facing **wallet status**, clearer hints, and a **manual faucet** path so signatures show up once devnet SOL lands.
+- **“Trustworthy tone”**: Writing patient-facing language that is **kind without being misleading**, and clinician copy that is **specific**—iterated through separate modes and prompts.
+- **Scope under time pressure**: We chose **depth on one coherent encounter story** over covering every sepsis edge case in the book.
+
+---
+
+*Synthetic demo data only. Not for clinical decision-making.*

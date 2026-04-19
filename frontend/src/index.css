@@ -1,0 +1,675 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Tailwind `dark:` maps to class on <html> (see ThemeContext) */
+@custom-variant dark (&:where(.dark *));
+
+/*
+  Theme tokens (light :root / dark html.dark) + Tailwind @theme bridge
+*/
+:root {
+  /* Warm cream surfaces (Claude-adjacent terracotta family) */
+  --card: #fff8f3;
+  --ring: #d97757;
+  --input: #d4c4b8;
+  --muted: #f3ece6;
+  --accent: #ede4dc;
+  --border: #e8d5cc;
+  --radius: 0.5rem;
+  --chart-1: #c96442;
+  --chart-2: #9c87f5;
+  --chart-3: #e8d0c5;
+  --chart-4: #dbd3f0;
+  --chart-5: #b4532a;
+  --popover: #ffffff;
+  --primary: #d97757;
+  --sidebar: #faf5f0;
+  --secondary: #ede4dc;
+  --background: #fff9f5;
+  --foreground: #292524;
+  --destructive: #b91c1c;
+  --sidebar-ring: #d6cfc7;
+  --sidebar-accent: #f3ece6;
+  --sidebar-border: #e8dfd7;
+  --card-foreground: #1c1917;
+  --sidebar-primary: #c96442;
+  --muted-foreground: #78716c;
+  --accent-foreground: #292524;
+  --popover-foreground: #292524;
+  --primary-foreground: #ffffff;
+  --sidebar-foreground: #44403c;
+  --secondary-foreground: #57534e;
+  --destructive-foreground: #ffffff;
+  --sidebar-accent-foreground: #44403c;
+  --sidebar-primary-foreground: #fffaf7;
+
+  /* Typography */
+  --font-ui: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+  /* App shell + legacy iOS-style aliases (used by health/legacy components) */
+  --app-header-bg: var(--background);
+  --app-sticky-bg: var(--muted);
+  --app-sticky-bg-strong: var(--sidebar);
+  --ios-grouped-bg: var(--background);
+  --ios-card: var(--card);
+  --ios-elevated: var(--popover);
+  --ios-label: var(--foreground);
+  --ios-secondary-label: var(--muted-foreground);
+  --ios-tertiary-label: color-mix(in srgb, var(--muted-foreground) 65%, transparent);
+  --ios-separator: var(--border);
+  --ios-blue: #3a82f7;
+  --ios-green: var(--primary);
+  --ios-indigo: #5856d6;
+  --ios-orange: #b4552d;
+  --ios-red: #ef4444;
+  --ios-yellow: #c96442;
+  --ios-purple: #9c87f5;
+  --ios-turquoise: #9c87f5;
+  --ios-fill: color-mix(in srgb, var(--muted) 85%, transparent);
+  --ios-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --ios-radius-lg: 12px;
+  --ios-radius-xl: 14px;
+  --ios-radius-pill: 980px;
+  --chart-grid: color-mix(in srgb, var(--border) 70%, transparent);
+  --chart-axis: var(--muted-foreground);
+  --chart-map: var(--chart-1);
+  --chart-lactate: var(--chart-5);
+  --chart-hr: var(--chart-2);
+  --chart-ref: var(--destructive);
+  --chart-accent: var(--chart-4);
+
+  --card-shadow:
+    0 1px 0 color-mix(in srgb, var(--primary) 12%, transparent) inset, 0 1px 3px rgba(41, 37, 36, 0.05),
+    0 10px 28px -8px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+@theme inline {
+  --font-sans: var(--font-ui);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-card: var(--card);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-radius: var(--radius);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-popover: var(--popover);
+  --color-primary: var(--primary);
+  --color-sidebar: var(--sidebar);
+  --color-secondary: var(--secondary);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-destructive: var(--destructive);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-card-foreground: var(--card-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+}
+
+html.dark {
+  /* Claude terracotta — warm charcoal shell, orange-tinted boxes */
+  --card: #2f2924;
+  --ring: #ea8c6a;
+  --input: #575049;
+  --muted: #1f1c19;
+  --accent: #26211d;
+  --border: #4d423a;
+  --chart-1: #d97757;
+  --chart-2: #9c87f5;
+  --chart-3: #3d342e;
+  --chart-4: #3f3650;
+  --chart-5: #c2410c;
+  --popover: #34302b;
+  --primary: #d97757;
+  --sidebar: #221e1b;
+  --secondary: #ede4dc;
+  --background: #1c1917;
+  --foreground: #e7e5e4;
+  --destructive: #ef4444;
+  --sidebar-ring: #6b5d54;
+  --sidebar-accent: #181614;
+  --sidebar-border: #4a423c;
+  --card-foreground: #fafaf9;
+  --sidebar-primary: #d97757;
+  --muted-foreground: #a8a29e;
+  --accent-foreground: #faf5f0;
+  --popover-foreground: #f5f5f4;
+  --primary-foreground: #1c1917;
+  --sidebar-foreground: #d6d3d1;
+  --secondary-foreground: #292524;
+  --destructive-foreground: #ffffff;
+  --sidebar-accent-foreground: #d6d3d1;
+  --sidebar-primary-foreground: #fffaf7;
+
+  --app-header-bg: var(--background);
+  --app-sticky-bg: var(--muted);
+  --app-sticky-bg-strong: var(--sidebar);
+  --ios-grouped-bg: var(--background);
+  --ios-card: var(--card);
+  --ios-elevated: var(--popover);
+  --ios-label: var(--foreground);
+  --ios-secondary-label: var(--muted-foreground);
+  --ios-tertiary-label: color-mix(in srgb, var(--muted-foreground) 55%, transparent);
+  --ios-separator: var(--border);
+  --ios-blue: #38bdf8;
+  --ios-green: var(--primary);
+  --ios-orange: #b4552d;
+  --ios-red: #ef4444;
+  --ios-fill: color-mix(in srgb, var(--card) 55%, transparent);
+  --ios-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  --chart-grid: color-mix(in srgb, var(--border) 55%, transparent);
+  --chart-axis: var(--muted-foreground);
+  --chart-map: var(--chart-1);
+  --chart-lactate: var(--chart-5);
+  --chart-hr: var(--chart-2);
+  --chart-ref: var(--destructive);
+  --chart-accent: var(--chart-4);
+
+  --card-shadow:
+    0 1px 0 color-mix(in srgb, var(--primary) 14%, transparent) inset, 0 2px 8px rgba(0, 0, 0, 0.28),
+    0 12px 32px -8px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply m-0 bg-background text-foreground transition-colors;
+    font-family: var(--font-ui);
+    font-size: 17px;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .animate-pulse-red-dot {
+    animation: pulse-red-dot 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-red-dot {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+  }
+  50% {
+    opacity: 0.9;
+    box-shadow: 0 0 14px 3px rgba(239, 68, 68, 0.35);
+  }
+}
+
+/* Align header and page content to the same max width (rectangle column) */
+@layer components {
+  .app-content-width {
+    @apply mx-auto w-full max-w-[1600px] px-4 sm:px-6;
+  }
+
+  /** Authenticated main region (below global header) */
+  .app-main {
+    @apply w-full min-w-0 bg-background;
+    min-height: calc(100dvh - 3.5rem);
+  }
+
+  /** Global app header — command center: solid slate bar */
+  .app-header {
+    @apply sticky top-0 z-50 flex h-14 shrink-0 items-center border-b border-[color:var(--ios-separator)] backdrop-blur-xl;
+    background: var(--app-header-bg);
+  }
+
+  html.dark .app-header {
+    @apply border-border;
+    background: var(--app-header-bg);
+    backdrop-filter: none;
+  }
+
+  /** Sticky page title row (Browse, etc.) — under app header */
+  .app-sticky-subheader {
+    @apply sticky top-14 z-30 border-b border-[color:var(--ios-separator)] backdrop-blur-xl;
+    background: var(--app-sticky-bg-strong);
+  }
+
+  html.dark .app-sticky-subheader {
+    @apply border-border;
+    background: var(--app-sticky-bg-strong);
+    backdrop-filter: none;
+  }
+
+  /** Full page shell (encounter views) */
+  .app-page {
+    @apply min-h-screen bg-background text-foreground;
+  }
+
+  /** Encounter / patient hero strip under header */
+  .app-encounter-hero {
+    @apply border-b border-border bg-gradient-to-b from-primary/[0.05] to-card py-6 shadow-[var(--card-shadow)];
+  }
+
+  /** Primary grid area below encounter hero (matches app-content-width) */
+  .app-encounter-body {
+    @apply mx-auto w-full max-w-[1600px] px-4 py-4 pb-8 sm:px-6;
+  }
+
+  /** Page / hero — same scale everywhere (Browse, login, encounter) */
+  .app-title-page,
+  .app-title-hero {
+    font-family: var(--font-display);
+    @apply text-3xl font-semibold tracking-tight text-foreground md:text-4xl;
+  }
+
+  /** Sticky section eyebrow (Browse, etc.) */
+  .app-eyebrow {
+    font-family: var(--font-display);
+    @apply text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-muted-foreground;
+  }
+
+  /** KPI & hero numbers inside cards */
+  .app-metric-value {
+    font-family: var(--font-display);
+    @apply text-2xl font-semibold tabular-nums tracking-tight;
+  }
+
+  /** Card and panel titles (matches `CardTitle` in ui/card) */
+  .app-card-heading {
+    font-family: var(--font-display);
+    @apply text-lg font-semibold leading-tight tracking-tight text-foreground md:text-[1.35rem];
+  }
+
+  /** Nested panels/chips — same terracotta lift as Card */
+  .app-surface-inset {
+    @apply rounded-lg border border-border bg-gradient-to-b from-primary/[0.07] to-card shadow-[var(--card-shadow)];
+  }
+
+  /** Muted line under hero titles */
+  .app-meta-line {
+    @apply mt-1 text-sm font-normal tracking-normal text-muted-foreground;
+    font-family: var(--font-ui);
+  }
+
+  /** Login & unauthenticated full-screen panels */
+  .app-auth-screen {
+    @apply flex min-h-dvh w-full flex-col bg-background px-4 py-12 sm:justify-center sm:py-16;
+  }
+
+  /** Dark charts — full width, subtle grid */
+  .chart-shell {
+    @apply w-full rounded-lg border border-border bg-muted/60;
+  }
+
+  html.dark .chart-shell {
+    @apply bg-card/80;
+  }
+
+}
+
+/* —— Legacy class names (charts, risk, tables) — kept for gradual migration —— */
+.mode-toggle {
+  display: none;
+}
+
+.mono {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* Segmented controls */
+.mode-segmented,
+.health-segmented,
+.theme-segmented {
+  @apply inline-flex gap-0 rounded-[9px] p-0.5;
+  background: var(--ios-fill);
+}
+
+.mode-segmented button,
+.health-segmented button,
+.theme-segmented button {
+  @apply inline-flex cursor-pointer items-center gap-1 rounded-[7px] border-0 bg-transparent px-[0.85rem] py-[0.4rem] text-[0.8125rem] font-semibold transition-colors;
+  color: var(--ios-label);
+}
+
+.mode-segmented button.active,
+.health-segmented button.active,
+.theme-segmented button.active {
+  background: var(--ios-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+html.dark .mode-segmented button.active,
+html.dark .health-segmented button.active,
+html.dark .theme-segmented button.active {
+  background: var(--ios-elevated);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+/* Cards (legacy) */
+.card,
+.health-card {
+  @apply rounded-[var(--ios-radius-lg)] border border-transparent p-4;
+  background: var(--ios-card);
+  box-shadow: var(--ios-shadow);
+}
+
+html.dark .card,
+html.dark .health-card {
+  border-color: var(--ios-separator);
+  box-shadow: none;
+}
+
+.health-group {
+  @apply overflow-hidden rounded-[var(--ios-radius-lg)] border border-transparent;
+  background: var(--ios-card);
+  box-shadow: var(--ios-shadow);
+}
+
+html.dark .health-group {
+  border-color: var(--ios-separator);
+  box-shadow: none;
+}
+
+/* Tables */
+table.data-table {
+  @apply w-full border-collapse bg-[var(--ios-card)] text-[0.8125rem];
+}
+
+.data-table thead th {
+  @apply px-[0.65rem] py-2 text-left text-[0.6875rem] font-semibold uppercase tracking-wide;
+  color: var(--ios-secondary-label);
+  border-bottom: 0.5px solid var(--ios-separator);
+}
+
+.data-table tbody td {
+  @apply px-[0.65rem] py-[0.65rem] align-middle;
+  border-bottom: 0.5px solid var(--ios-separator);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.health-table-wrap {
+  @apply overflow-hidden rounded-[var(--ios-radius-lg)] border border-transparent bg-[var(--ios-card)];
+  box-shadow: var(--ios-shadow);
+}
+
+html.dark .health-table-wrap {
+  border-color: var(--ios-separator);
+  box-shadow: none;
+}
+
+.health-link {
+  @apply font-medium no-underline;
+  color: var(--ios-blue);
+}
+
+.health-link:hover {
+  text-decoration: underline;
+}
+
+/* Risk — emerald / amber / red only */
+.risk-badge {
+  @apply inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-semibold tracking-tight;
+}
+
+.risk-low {
+  background: color-mix(in srgb, #10b981 22%, transparent);
+  color: #34d399;
+}
+
+html.dark .risk-low {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.risk-mod {
+  background: color-mix(in srgb, #f59e0b 22%, transparent);
+  color: #fbbf24;
+}
+
+html.dark .risk-mod {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.risk-high {
+  background: color-mix(in srgb, #ef4444 20%, transparent);
+  color: #f87171;
+}
+
+html.dark .risk-high {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.risk-crit {
+  background: color-mix(in srgb, #ef4444 28%, transparent);
+  color: #ef4444;
+}
+
+html.dark .risk-crit {
+  background: rgba(239, 68, 68, 0.22);
+  color: #fca5a5;
+}
+
+.risk-badge__pulse {
+  @apply inline-block size-1.5 shrink-0 rounded-full bg-red-500;
+  animation: pulse-red-dot 1.6s ease-in-out infinite;
+}
+
+.grid-3 {
+  @apply grid grid-cols-1 gap-4 lg:grid-cols-3;
+}
+
+.delay-bad {
+  @apply font-semibold;
+  color: var(--ios-red);
+}
+
+.delay-warn {
+  @apply font-semibold;
+  color: var(--ios-orange);
+}
+
+.subtitle-word {
+  @apply inline rounded-sm px-0.5;
+}
+
+.subtitle-word.active {
+  background: color-mix(in srgb, var(--ios-green) 35%, transparent);
+}
+
+html.dark .subtitle-word.active {
+  background: rgba(48, 209, 88, 0.35);
+}
+
+.patient-feature-grid {
+  @apply grid gap-3;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.audio-meta {
+  @apply text-xs;
+  color: var(--ios-secondary-label);
+}
+
+.health-input {
+  @apply mb-2 w-full rounded-[10px] border-0 px-3 py-[0.65rem] text-base outline-none;
+  background: var(--ios-fill);
+  color: var(--ios-label);
+}
+
+.health-input::placeholder {
+  color: var(--ios-tertiary-label);
+}
+
+.health-input:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ios-green) 25%, transparent);
+}
+
+html.dark .health-input:focus {
+  box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.28);
+}
+
+/* Health layout (shell / grouped / metric) */
+.health-back-link {
+  @apply mb-1 inline-block text-[1.0625rem] font-medium no-underline;
+  color: var(--ios-blue);
+}
+
+.health-back-link:hover {
+  text-decoration: underline;
+}
+
+.health-grouped {
+  @apply mb-6;
+}
+
+.health-grouped__heading {
+  @apply mb-2 ml-1 text-[0.8125rem] font-semibold uppercase tracking-widest;
+  font-family: var(--font-display);
+  color: var(--ios-secondary-label);
+}
+
+.health-grouped__card {
+  @apply overflow-hidden rounded-[var(--ios-radius-lg)] border border-transparent;
+  background: var(--ios-card);
+  box-shadow: var(--ios-shadow);
+}
+
+html.dark .health-grouped__card {
+  border-color: var(--ios-separator);
+  box-shadow: none;
+}
+
+.health-grouped__footnote {
+  @apply ml-1 mt-2 text-[0.8125rem] leading-snug;
+  color: var(--ios-secondary-label);
+}
+
+.health-grouped__padded {
+  @apply px-4 pb-4 pt-[0.85rem];
+}
+
+.health-grouped__card > .health-metric {
+  border-bottom: 0.5px solid var(--ios-separator);
+}
+
+.health-browse-grid {
+  @apply grid items-start gap-4;
+  grid-template-columns: 1fr minmax(240px, 320px);
+}
+
+@media (max-width: 900px) {
+  .health-browse-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.health-grouped__card .health-table-wrap {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+html.dark .health-grouped__card .health-table-wrap {
+  border: none;
+}
+
+.health-row {
+  @apply flex items-center justify-between gap-3 border-b border-[var(--ios-separator)] px-4 py-3 text-base no-underline;
+  color: inherit;
+  border-bottom-width: 0.5px;
+}
+
+.health-row:last-child {
+  border-bottom: none;
+}
+
+.health-row--interactive {
+  @apply cursor-pointer transition-colors hover:bg-[var(--ios-fill)];
+}
+
+.health-row__label {
+  color: var(--ios-label);
+}
+
+.health-row__value {
+  @apply inline-flex items-center gap-1.5 font-medium tabular-nums;
+  color: var(--ios-secondary-label);
+}
+
+.health-row__chev {
+  @apply shrink-0 opacity-45;
+}
+
+.health-metric {
+  @apply px-4 pb-5 pt-5 text-center;
+}
+
+.health-metric__inner {
+  @apply flex items-baseline justify-center gap-0.5;
+}
+
+.health-metric__num {
+  @apply text-[clamp(3.25rem,8vw,4rem)] font-bold leading-none tracking-tight;
+  font-family: var(--font-display);
+  color: var(--ios-green);
+}
+
+.health-metric__unit {
+  @apply text-[1.75rem] font-semibold;
+  font-family: var(--font-display);
+  color: var(--ios-secondary-label);
+}
+
+.health-metric__tagline {
+  @apply mt-2 text-[1.0625rem];
+  color: var(--ios-secondary-label);
+}
+
+.health-page-title {
+  @apply mb-1 text-[1.75rem] font-bold tracking-tight;
+  font-family: var(--font-display);
+}
+
+.health-footnote {
+  @apply mb-2 ml-1 mt-5 text-[0.8125rem] font-semibold uppercase tracking-wide;
+  color: var(--ios-secondary-label);
+}
