@@ -60,7 +60,7 @@ We also wanted **transparency** to be concrete, not decorative—**who opened th
 
 - **Dual UX is a product choice**: “Clinician” vs “Patient & family” is not a theme toggle—it changes **language**, **density**, and **what we emphasize** (risk vs comfort, jargon vs plain words).
 - **Generative AI is a narrator, not the scoreboard**: LLM output **explains and phrases** modeled results; **risk and trajectories** come from explicit rules over structured fields (SOFA-related signals, timepoints TP1–TP4, bundle timings).
-- **Infrastructure is part of the demo**: shipping with optional keys taught us to **degrade gracefully**—cache where it helps, fall back to sensible copy when APIs are offline, and keep Mongo/S3/Solana **optional** for judges who run locally.
+- **Infrastructure is part of the demo**: shipping with optional keys taught us to **degrade gracefully**—cache where it helps, fall back to sensible copy when APIs are offline, and keep Mongo/Solana **optional** for judges who run locally.
 - **Web3 ops are real**: devnet SOL, RPC limits, and faucet rate limits affect whether **on-chain signatures** appear—treating that as an operator concern, not magic.
 
 We think of the **rule-based risk** $R$ as a function of severity signals and timepoint features $\mathbf{z}_t$:
@@ -81,7 +81,7 @@ All patient rows come from our **master synthetic sepsis generator** (`gen.py`, 
 
 - **Data & engine**: Synthetic cohort (`combined_sepsis_data_v7.csv`) → **FastAPI** services for encounters, computed risk, timelines, and recommended actions.
 - **Frontend**: **React + Vite + Tailwind** encounter dashboards—vitals and trajectory charts, timeline grids, patient/clinician layouts.
-- **Generative AI**: **Gemini** for explanations (mode-specific tone), chat, simplified wording, and chart narration; **ElevenLabs** for spoken summaries; **S3** for hosted audio when configured.
+- **Generative AI**: **Gemini** for explanations (mode-specific tone), chat, simplified wording, and chart narration; **ElevenLabs** for spoken summaries (audio served by the API).
 - **Persistence**: **MongoDB Atlas** (recently viewed, saved cases, access logs, caches), with an in-memory fallback for quick demos.
 - **Audit**: **Solana devnet** memo transactions with non-PHI payloads and explorer-linked **signatures** when the signing wallet is funded.
 

@@ -43,9 +43,9 @@
   --sidebar-accent-foreground: #44403c;
   --sidebar-primary-foreground: #fffaf7;
 
-  /* Typography */
+  /* Typography — single stack sitewide (headings use same family as body; weight/size carry hierarchy) */
   --font-ui: "Open Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-ui);
 
   /* App shell + legacy iOS-style aliases (used by health/legacy components) */
   --app-header-bg: var(--background);
@@ -210,7 +210,7 @@ html.dark {
   h4,
   h5,
   h6 {
-    font-family: var(--font-display);
+    font-family: var(--font-ui);
     font-weight: 600;
     letter-spacing: -0.02em;
   }
@@ -218,7 +218,7 @@ html.dark {
 
 @layer utilities {
   .font-display {
-    font-family: var(--font-display);
+    font-family: var(--font-ui);
   }
 
   .animate-pulse-red-dot {

@@ -411,7 +411,7 @@ export default function BrowseClinicalHome({ rows = [], criticalEncounterId, onL
 
   return (
     <HealthShell
-      eyebrow="Sepsis Copilot"
+      eyebrow="First Hour"
       title="Browse"
       subtitle="Encounters and modeled risk summaries across your cohort."
       wide

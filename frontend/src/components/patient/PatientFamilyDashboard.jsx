@@ -75,7 +75,7 @@ export default function PatientFamilyDashboard({
   const chiefLower = (data.chiefComplaint || "your care").toLowerCase();
 
   return (
-    <div className="app-page font-sans [&_.app-card-heading]:font-sans [&_.app-metric-value]:font-sans [&_.font-display]:font-sans">
+    <div className="app-page">
       <EncounterPageHeader data={data} />
 
       <div className="app-encounter-body pb-10">
@@ -263,6 +263,15 @@ export default function PatientFamilyDashboard({
                 </Button>
                 {loadingAudio ? (
                   <p className="text-xs text-muted-foreground">Preparing your narrated update&hellip;</p>
+                ) : null}
+                {audio?.speech_notice && !audio.audio_url ? (
+                  <p className="text-xs text-muted-foreground">{audio.speech_notice}</p>
+                ) : null}
+                {audio?.narration_text && !audio.audio_url ? (
+                  <div className="rounded-lg border border-border bg-muted/25 p-3">
+                    <p className="text-[0.65rem] font-medium text-muted-foreground">Transcript</p>
+                    <p className="mt-1 text-sm leading-relaxed text-foreground">{audio.narration_text}</p>
+                  </div>
                 ) : null}
                 {audio?.error ? (
                   <ScrollArea className="h-[4.5rem]">

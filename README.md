@@ -1,6 +1,6 @@
-# Sepsis Copilot
+# First Hour
 
-Patient-centered clinical decision support for a hackathon: **clinician** vs **patient/family** modes (toggle in header), Gemini explanations & chat, ElevenLabs narration, MongoDB (recently viewed / saved cases / access log), AWS S3 audio hosting, Solana devnet memo audit trail.
+Patient-centered clinical decision support for a hackathon: **clinician** vs **patient/family** modes (toggle in header), Gemini explanations & chat, ElevenLabs narration (audio served by the API), MongoDB (recently viewed / saved cases / access log), Solana devnet memo audit trail.
 
 ## Data
 
@@ -16,8 +16,8 @@ cp .env.example .env   # fill keys (optional for partial demo)
 uvicorn main:app --reload --port 8000
 ```
 
-- Without `MONGODB_URI`, the app uses **in-memory** storage (demo still works).
-- Without API keys, Gemini / ElevenLabs / AWS / Solana features **degrade gracefully**.
+- Without `MONGODB_URI`, the app uses **in-memory** storage (demo still works). With Atlas, collections live in database **`first_hour`** (older demos may have used `sepsis_copilot`; copy data in Atlas if you need to migrate).
+- Without API keys, Gemini / ElevenLabs / Solana features **degrade gracefully**.
 
 ### Solana devnet
 
@@ -51,7 +51,21 @@ Set `VITE_API_BASE=http://127.0.0.1:8000` if the API is not the default.
 - **Gemini**: `/explain`, `/chat`, `/explain/simplified`, counterfactual narrative.
 - **ElevenLabs**: `/narrate` + `AudioPlayer` word-highlight sync.
 - **MongoDB Atlas**: `MONGODB_URI` → persistent `recently_viewed`, `saved_cases`, `access_log`, caches.
-- **AWS**: S3 upload in `s3_service.py` + “Generated in X ms” in audio response.
+- **Audio**: generated MP3 is held in memory and streamed from `/static/audio/...` (see `audio_storage.py`).
 - **Solana**: devnet memo transactions + explorer links in `SolanaLog`.
 
 Synthetic data only — not for real clinical decisions.
+
+## Deploy
+
+See **[DEPLOY.md](./DEPLOY.md)** for Docker Compose, split API/UI deploys, environment variables, and CORS.
+
+Quick local stack:
+
+```bash
+cp backend/.env.example backend/.env   # add GEMINI_API_KEY, etc.
+docker compose up --build
+```
+
+- UI: http://localhost:8080  
+- API: http://localhost:8000  

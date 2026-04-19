@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, Link, Navigate, Outlet, useLocation } from "react-router-dom";
 import { Stethoscope, Bell, LogOut } from "lucide-react";
 import ModeToggle from "./components/ModeToggle.jsx";
+import ThemeToggle from "./components/ThemeToggle.jsx";
 import PatientBrowser from "./pages/PatientBrowser.jsx";
 import PatientDashboard from "./pages/PatientDashboard.jsx";
 import EncounterDashboardShowcase from "./pages/EncounterDashboardShowcase.jsx";
@@ -42,7 +43,7 @@ function AppChrome() {
               to={homeTo}
               className="font-display shrink-0 text-[1.0625rem] font-semibold tracking-tight text-primary no-underline hover:text-primary/80"
             >
-              Sepsis Copilot
+              First Hour
             </Link>
             {showBrowseBack ? (
               <Link
@@ -55,6 +56,7 @@ function AppChrome() {
           </div>
           <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
             {showModeToggle ? <ModeToggle /> : null}
+            <ThemeToggle />
             <Button variant="ghost" size="icon" type="button" aria-label="Notifications">
               <Bell className="h-5 w-5" />
             </Button>

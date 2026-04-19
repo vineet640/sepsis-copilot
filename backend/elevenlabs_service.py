@@ -1,4 +1,4 @@
-"""ElevenLabs TTS + S3; word-level timestamps for subtitle sync (approximate)."""
+"""ElevenLabs TTS; audio served from API memory; word-level timestamps for subtitle sync (approximate)."""
 from __future__ import annotations
 
 import os
@@ -6,7 +6,7 @@ import re
 import time
 from typing import Any
 
-from s3_service import upload_audio
+from audio_storage import upload_audio
 
 # Premade voice IDs (see ElevenLabs "Premade voices" / GET /v1/voices). Library-only IDs
 # return 402 on free API tier; Rachel (21m00Tcm4TlvDq8ikWAM) is often treated as library for API.
@@ -15,17 +15,29 @@ VOICE_URGENT_ID = os.getenv("ELEVENLABS_VOICE_URGENT", "ErXwobaYiN019PkySvjV")  
 
 
 def _normalize_tts_error(exc: Exception) -> str:
-    """Readable message; avoid dumping huge HTTP bodies into JSON."""
+    """Readable message; avoid dumping huge HTTP bodies or httpx header blobs into JSON."""
     s = str(exc)
+    # httpx / requests often stringify Response headers — useless in UI
+    if "headers:" in s and ("date" in s.lower() or "server" in s.lower()):
+        if "402" in s or "payment" in s.lower() or "quota" in s.lower():
+            return "ElevenLabs: payment or quota issue — check your API plan."
+        if "401" in s or "403" in s or "Unauthorized" in s:
+            return "ElevenLabs: invalid or unauthorized API key."
+        return "ElevenLabs request failed (network or API error). Check ELEVENLABS_API_KEY and try again."
     if "paid_plan_required" in s or "payment_required" in s or "Free users cannot use library voices" in s:
         return (
             "ElevenLabs: this voice is not allowed on the free API tier (often Voice Library / non-premade voices). "
             "Use premade voice IDs (see ElevenLabs docs) or set ELEVENLABS_VOICE_CALM and ELEVENLABS_VOICE_URGENT "
             "to voices from GET /v1/voices, or upgrade."
         )
-    if len(s) > 400:
-        return s[:200] + "…"
+    if len(s) > 200:
+        return s[:160] + "…"
     return s
+
+
+def narration_word_timestamps(text: str, duration_ms: int) -> list[dict[str, Any]]:
+    """Exported for fallback responses outside this module."""
+    return _word_timestamps(text, duration_ms)
 
 
 def _word_timestamps(text: str, duration_ms: int) -> list[dict[str, Any]]:
@@ -55,15 +67,17 @@ async def generate_audio(
 
     api_key = os.getenv("ELEVENLABS_API_KEY")
     if not api_key:
+        duration_ms = max(3000, len(text) * 60)
         return {
             "audio_url": "",
-            "duration_ms": 0,
+            "duration_ms": duration_ms,
             "voice_mode": voice_mode,
             "generation_time_ms": 0,
             "cached": False,
             "narration_text": text,
-            "word_timestamps": _word_timestamps(text, 3000),
-            "error": "no_api_key",
+            "word_timestamps": _word_timestamps(text, duration_ms),
+            "speech_available": False,
+            "speech_notice": "Spoken audio needs ELEVENLABS_API_KEY on the server. You can still read the text below.",
         }
 
     try:
@@ -90,15 +104,18 @@ async def generate_audio(
             "cached": False,
             "narration_text": text,
             "word_timestamps": _word_timestamps(text, duration_ms),
+            "speech_available": True,
         }
     except Exception as e:
+        duration_ms = max(3000, len(text) * 60)
         return {
             "audio_url": "",
-            "duration_ms": 0,
+            "duration_ms": duration_ms,
             "voice_mode": voice_mode,
             "generation_time_ms": int((time.time() - t0) * 1000),
             "cached": False,
             "narration_text": text,
-            "word_timestamps": _word_timestamps(text, 3000),
-            "error": _normalize_tts_error(e),
+            "word_timestamps": _word_timestamps(text, duration_ms),
+            "speech_available": False,
+            "speech_notice": _normalize_tts_error(e),
         }

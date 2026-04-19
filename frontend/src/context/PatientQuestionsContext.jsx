@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-const STORAGE_KEY = "sepsis_copilot_patient_questions_v1";
+const STORAGE_KEY = "first_hour_patient_questions_v1";
 
 /**
  * @typedef {{ id: string; text: string; askedAt: number; doctorAnswer?: string; answeredAt?: number }} PatientQuestion

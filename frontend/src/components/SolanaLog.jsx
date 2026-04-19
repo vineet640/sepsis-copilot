@@ -115,11 +115,34 @@ export default function SolanaLog({ encounterId, embedded = false }) {
   const { isPatientMode } = useMode();
   const [items, setItems] = useState([]);
   const [walletStatus, setWalletStatus] = useState(null);
+  const [logFetchError, setLogFetchError] = useState("");
 
   useEffect(() => {
-    apiGet(`/solana/access-log/${encodeURIComponent(encounterId)}`)
-      .then((d) => setItems(d.items || []))
-      .catch(() => setItems([]));
+    let cancelled = false;
+    const load = () => {
+      apiGet(`/solana/access-log/${encodeURIComponent(encounterId)}`)
+        .then((d) => {
+          if (!cancelled) {
+            setItems(d.items || []);
+            setLogFetchError("");
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setItems([]);
+            setLogFetchError("Access log unavailable (API or database). Signatures may still appear after refresh.");
+          }
+        });
+    };
+    // Access rows are written in a FastAPI background task after GET /patient returns; refetch so the table fills in.
+    load();
+    const t1 = setTimeout(load, 600);
+    const t2 = setTimeout(load, 2000);
+    return () => {
+      cancelled = true;
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [encounterId]);
 
   useEffect(() => {
@@ -135,6 +158,11 @@ export default function SolanaLog({ encounterId, embedded = false }) {
   if (isPatientMode) {
     const inner = (
       <div className="space-y-2">
+        {logFetchError ? (
+          <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-[0.65rem] text-amber-950 dark:text-amber-100">
+            {logFetchError}
+          </p>
+        ) : null}
         <WalletSolHint status={walletStatus} />
         <p className="text-xs text-foreground">This list shows who opened your care summary.</p>
         <p className="text-[0.65rem] text-muted-foreground">{caption}</p>
@@ -160,6 +188,11 @@ export default function SolanaLog({ encounterId, embedded = false }) {
           Verified access log
         </span>
       </div>
+      {logFetchError ? (
+        <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-[0.65rem] text-amber-950 dark:text-amber-100">
+          {logFetchError}
+        </p>
+      ) : null}
       <WalletSolHint status={walletStatus} />
       <p className="text-[0.65rem] text-muted-foreground">{caption}</p>
       <AuditTable rows={displayed} compact />

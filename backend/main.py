@@ -1,4 +1,4 @@
-"""Sepsis Copilot — FastAPI backend."""
+"""First Hour — FastAPI backend."""
 from __future__ import annotations
 
 import os
@@ -21,7 +21,7 @@ import mongo_service
 import solana_service
 from action_engine import generate_recommended_actions
 from data_loader import get_all_patients, get_patient
-from elevenlabs_service import generate_audio
+from elevenlabs_service import generate_audio, narration_word_timestamps
 from gemini_service import (
     answer_patient_question,
     generate_counterfactual,
@@ -31,7 +31,7 @@ from gemini_service import (
     generate_vitals_chart_insight,
 )
 from risk_engine import compute_risk, compute_risk_at_tp, recompute_risk_counterfactual
-from s3_service import get_local_audio
+from audio_storage import get_local_audio
 
 
 # Care pathway process times (minutes) — keys must match frontend `CARE_TRACK_KEYS` in careTrackProcesses.js
@@ -47,6 +47,34 @@ PROCESS_TAT_KEYS = [
     "tat_recognition_to_abx_admin_min",
     "tat_door_to_pressor_start_min",
 ]
+
+
+def _cors_origins() -> list[str]:
+    """Merge CORS_ORIGINS / CORS_ORIGIN with local dev origins.
+
+    If only production URLs are set in .env, browsers running ``npm run dev`` on
+    localhost:5173 would otherwise be blocked. Deployed APIs still accept
+    production origins from the env; localhost entries are harmless for typical hosts.
+    """
+    local_defaults = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+    ]
+    out: list[str] = []
+    multi = os.getenv("CORS_ORIGINS", "").strip()
+    if multi:
+        out.extend([o.strip() for o in multi.split(",") if o.strip()])
+    single = os.getenv("CORS_ORIGIN", "").strip()
+    if single and single not in out:
+        out.insert(0, single)
+    for x in local_defaults:
+        if x not in out:
+            out.append(x)
+    return out
 
 
 def _json_safe(obj: Any) -> Any:
@@ -115,7 +143,7 @@ async def lifespan(app: FastAPI):
 
     pts = load_data()
     n = mongo_service.upsert_patients(pts)
-    print(f"Sepsis Copilot ready — {n} patients loaded")
+    print(f"First Hour ready — {n} patients loaded")
     try:
         r = solana_service.fund_wallet_lamports(10**9)
         print("Solana airdrop:", r)
@@ -124,10 +152,10 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Sepsis Copilot API", lifespan=lifespan)
+app = FastAPI(title="First Hour API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv("CORS_ORIGIN", "http://localhost:5173"), "http://127.0.0.1:5173"],
+    allow_origins=_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -275,25 +303,52 @@ class NarrateBody(BaseModel):
 
 @app.post("/narrate/{encounter_id}")
 async def narrate(encounter_id: str, body: NarrateBody):
+    """Always returns 200 with narration text when possible; speech is optional (ElevenLabs)."""
     p = get_patient(encounter_id)
     if not p:
         raise HTTPException(404)
     r = compute_risk(p)
     em = body.explanation_mode if body.explanation_mode in ("clinician", "patient") else "patient"
     key = f"explain:{encounter_id}:{em}"
-    cached = mongo_service.get_cached_explain(key)
-    if cached:
-        text = cached
-    else:
-        text = await generate_explanation(p, r, em)
-        mongo_service.cache_explain(key, text)
-    return await generate_audio(
-        text,
-        encounter_id,
-        voice_mode=body.voice_mode,
-        speed=body.speed,
-        explanation_mode=em,
-    )
+    text = ""
+    try:
+        cached = mongo_service.get_cached_explain(key)
+        if cached:
+            text = cached
+        else:
+            text = await generate_explanation(p, r, em)
+            try:
+                mongo_service.cache_explain(key, text)
+            except Exception:
+                pass
+    except Exception:
+        st = p.get("highest_sepsis_status") or "this encounter"
+        text = (
+            f"Demo care summary for {st}: your team is monitoring labs and vitals. "
+            "Ask your nurse or doctor about anything that worries you. "
+            "(The live AI writer was unavailable.)"
+        )
+    try:
+        return await generate_audio(
+            text,
+            encounter_id,
+            voice_mode=body.voice_mode,
+            speed=body.speed,
+            explanation_mode=em,
+        )
+    except Exception:
+        duration_ms = max(3000, len(text) * 60)
+        return {
+            "audio_url": "",
+            "duration_ms": duration_ms,
+            "voice_mode": body.voice_mode,
+            "generation_time_ms": 0,
+            "cached": False,
+            "narration_text": text,
+            "word_timestamps": narration_word_timestamps(text, duration_ms),
+            "speech_available": False,
+            "speech_notice": "Speech service error — read the transcript below.",
+        }
 
 
 class ChatBody(BaseModel):

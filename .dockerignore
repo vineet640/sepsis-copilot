@@ -1,0 +1,14 @@
+.git
+.gitignore
+**/.venv
+**/node_modules
+**/__pycache__
+*.pyc
+**/.env
+backend/.env
+frontend/dist
+*.md
+!README.md
+.DS_Store
+devpost-copy.html
+DEVPOST_ABOUT.md

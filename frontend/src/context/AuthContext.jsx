@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { DEMO_PATIENT_ENCOUNTER_ID } from "@/constants/demoPatient.js";
 
-const STORAGE_KEY = "sepsis_copilot_auth";
+const STORAGE_KEY = "first_hour_auth";
 
 const AuthContext = createContext({
   role: null,
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
 
   const loginClinical = useCallback(() => {
     try {
-      localStorage.setItem("sepsis_copilot_mode", "clinician");
+      localStorage.setItem("first_hour_mode", "clinician");
     } catch {
       /* ignore */
     }

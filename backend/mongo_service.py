@@ -6,12 +6,21 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from pymongo import MongoClient, ASCENDING
+from pymongo import ASCENDING, MongoClient, ReplaceOne
 from pymongo.errors import PyMongoError
 
 _client: MongoClient | None = None
 _db: Any = None
 _MEM: dict[str, Any] = {}
+
+
+def _json_safe_doc(d: dict[str, Any]) -> dict[str, Any]:
+    """Drop MongoDB ``_id`` (BSON ObjectId) so FastAPI responses are JSON-serializable."""
+    return {k: v for k, v in d.items() if k != "_id"}
+
+
+def _json_safe_docs(docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [_json_safe_doc(x) for x in docs]
 
 
 def _use_memory() -> bool:
@@ -26,7 +35,7 @@ def _dbx():
         return _db
     uri = os.environ["MONGODB_URI"]
     _client = MongoClient(uri, serverSelectionTimeoutMS=5000)
-    _db = _client["sepsis_copilot"]
+    _db = _client["first_hour"]
     for coll, keys in (
         ("patients", [("encounter_id", ASCENDING)]),
         ("recently_viewed", [("user_session_id", ASCENDING), ("viewed_at", ASCENDING)]),
@@ -47,14 +56,19 @@ def upsert_patients(patients: list[dict[str, Any]]) -> int:
         _MEM["patients"] = {p["encounter_id"]: p for p in patients}
         return len(patients)
     db = _dbx()
-    n = 0
+    ops: list[ReplaceOne] = []
     for p in patients:
         eid = p.get("encounter_id")
         if not eid:
             continue
-        db.patients.update_one({"encounter_id": eid}, {"$set": p}, upsert=True)
-        n += 1
-    return n
+        ops.append(ReplaceOne({"encounter_id": eid}, p, upsert=True))
+    if not ops:
+        return 0
+    # Chunked bulk_write — one update_one per row was blocking API startup for large cohorts.
+    chunk = 500
+    for i in range(0, len(ops), chunk):
+        db.patients.bulk_write(ops[i : i + chunk], ordered=False)
+    return len(ops)
 
 
 def log_access_event(
@@ -112,7 +126,7 @@ def get_recently_viewed(session_id: str, limit: int = 5) -> list[dict[str, Any]]
     try:
         db = _dbx()
         cur = db.recently_viewed.find({"user_session_id": session_id}).sort("viewed_at", -1).limit(limit)
-        return list(cur)
+        return _json_safe_docs(list(cur))
     except PyMongoError:
         return []
 
@@ -146,7 +160,7 @@ def get_saved_cases(session_id: str) -> list[dict[str, Any]]:
         return [x for x in _MEM.get("saved_cases", []) if x["user_session_id"] == session_id]
     try:
         db = _dbx()
-        return list(db.saved_cases.find({"user_session_id": session_id}).sort("saved_at", -1))
+        return _json_safe_docs(list(db.saved_cases.find({"user_session_id": session_id}).sort("saved_at", -1)))
     except PyMongoError:
         return []
 
@@ -171,7 +185,7 @@ def get_access_log(encounter_id: str) -> list[dict[str, Any]]:
         return [x for x in _MEM.get("access_log", []) if x.get("encounter_id") == encounter_id]
     try:
         db = _dbx()
-        return list(db.access_log.find({"encounter_id": encounter_id}).sort("viewed_at", -1).limit(50))
+        return _json_safe_docs(list(db.access_log.find({"encounter_id": encounter_id}).sort("viewed_at", -1).limit(50)))
     except PyMongoError:
         return []
 

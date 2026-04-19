@@ -3,12 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1c1917" />
-    <title>Sepsis Copilot</title>
+    <meta name="theme-color" content="#fff9f5" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("first_hour_theme");
+          if (t === "dark") document.documentElement.classList.add("dark");
+          else document.documentElement.classList.remove("dark");
+        } catch (e) {}
+      })();
+    </script>
+    <title>First Hour</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
       rel="stylesheet"
     />
   </head>

@@ -7,8 +7,8 @@ const ModeContext = createContext({
   isPatientMode: false,
 });
 
-const STORAGE_KEY = "sepsis_copilot_mode";
-const AUTH_STORAGE_KEY = "sepsis_copilot_auth";
+const STORAGE_KEY = "first_hour_mode";
+const AUTH_STORAGE_KEY = "first_hour_auth";
 
 function initialModeFromStorage() {
   try {

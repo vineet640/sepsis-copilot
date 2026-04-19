@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext.jsx";
 import { DEMO_PATIENT_ENCOUNTER_ID } from "@/constants/demoPatient.js";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.jsx";
 import { Button } from "@/components/ui/button.jsx";
+import ThemeToggle from "@/components/ThemeToggle.jsx";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -21,14 +22,17 @@ export default function LoginPage() {
 
   return (
     <div className="app-auth-screen">
-      <div className="mx-auto w-full max-w-lg space-y-8">
+      <div className="relative mx-auto w-full max-w-lg space-y-8">
+        <div className="absolute right-0 top-0 z-10">
+          <ThemeToggle />
+        </div>
         <div className="text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-sm">
             <Stethoscope className="h-8 w-8 text-primary-foreground" />
           </div>
           <h1 className="app-title-hero">Sign In</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Choose how you are using Sepsis Copilot. Sign-in uses your browser session; password policies can be added for production.
+            Choose how you are using First Hour. Sign-in uses your browser session; password policies can be added for production.
           </p>
         </div>
 

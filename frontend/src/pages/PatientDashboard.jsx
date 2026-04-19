@@ -14,13 +14,14 @@ import PatientFamilyDashboard from "../components/patient/PatientFamilyDashboard
 import { ClinicianEncounterDashboard } from "@/components/encounter/EncounterDashboardViews.jsx";
 import { DashboardPanelCard } from "@/components/encounter/DashboardPanelCard.jsx";
 import { buildEncounterDashboardData } from "@/lib/encounterDashboardData.js";
+import { pushLocalRecent } from "@/lib/localCaseHistory.js";
 import { Button } from "@/components/ui/button.jsx";
 
 function sessionId() {
-  let s = localStorage.getItem("sepsis_session_id");
+  let s = localStorage.getItem("first_hour_session_id");
   if (!s) {
     s = crypto.randomUUID();
-    localStorage.setItem("sepsis_session_id", s);
+    localStorage.setItem("first_hour_session_id", s);
   }
   return s;
 }
@@ -64,6 +65,11 @@ export default function PatientDashboard() {
   }, [encounterId, effectivePatientMode]);
 
   useEffect(() => {
+    if (!data?.patient?.encounter_id) return;
+    pushLocalRecent(encounterId, String(data.patient.hospital_id || ""));
+  }, [encounterId, data?.patient?.encounter_id]);
+
+  useEffect(() => {
     setAudio(null);
     setLoadingAudio(false);
   }, [effectivePatientMode]);
@@ -96,7 +102,13 @@ export default function PatientDashboard() {
       });
       setAudio(a);
     } catch (e) {
-      setAudio({ error: String(e.message) });
+      const msg = String(e?.message || e).slice(0, 280);
+      setAudio({
+        speech_available: false,
+        narration_text:
+          "We could not load narration from the server. Check that the API is running and try again.",
+        speech_notice: msg,
+      });
     } finally {
       setLoadingAudio(false);
     }
@@ -150,6 +162,15 @@ export default function PatientDashboard() {
                 Preparing spoken summary and audio&hellip;
               </p>
             )}
+            {audio?.speech_notice && !audio.audio_url ? (
+              <p className="mt-2 text-xs text-muted-foreground">{audio.speech_notice}</p>
+            ) : null}
+            {audio?.narration_text && !audio.audio_url ? (
+              <div className="mt-3 rounded-lg border border-border bg-muted/25 p-3">
+                <p className="text-[0.65rem] font-medium text-muted-foreground">Transcript</p>
+                <p className="mt-1 text-sm leading-relaxed text-foreground">{audio.narration_text}</p>
+              </div>
+            ) : null}
             {audio && !audio.error && audio.audio_url ? (
               <div className="mt-4">
                 <AudioPlayer
