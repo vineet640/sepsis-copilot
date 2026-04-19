@@ -60,6 +60,8 @@ Synthetic data only — not for real clinical decisions.
 
 See **[DEPLOY.md](./DEPLOY.md)** for Docker Compose, split API/UI deploys, environment variables, and CORS.
 
+**Domain `firsthour.health` (GoDaddy DNS):** **[DEPLOY_FIRSTHOUR_HEALTH.md](./DEPLOY_FIRSTHOUR_HEALTH.md)**.
+
 Quick local stack:
 
 ```bash
